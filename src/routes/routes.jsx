@@ -6,6 +6,7 @@ import LandingPage from "../pages/Landing";
 import Signup from "../pages/Signup";
 import Signin from "../pages/Signin";
 import Challenges from "../pages/Challenges";
+import Challenge,{challengeLoader} from "../pages/Challenge";
 
 const routes = createBrowserRouter([
   {
@@ -44,6 +45,11 @@ const routes = createBrowserRouter([
         element: <Challenges />,
       },
     ],
+  },
+  {
+    path: "/challenge/:challengeName",
+    element: <Challenge />,
+    loader: challengeLoader
   },
   {
     path: "*",
