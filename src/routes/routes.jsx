@@ -1,10 +1,9 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
-import Home from "../pages/Home";
 import NotFound from "../pages/NotFound";
 import LandingPage from "../pages/Landing";
-import Signup from "../pages/Signup";
-import Signin from "../pages/Signin";
+import SignUp from "../pages/SignUp";
+import Login from "../pages/Login";
 import Challenges from "../pages/Challenges";
 
 const routes = createBrowserRouter([
@@ -16,35 +15,21 @@ const routes = createBrowserRouter([
         index: true,
         element: <LandingPage />,
       },
-    ],
-  },
-  {
-    path: "/signup",
-    children: [
       {
-        index: true,
-        element: <Signup />,
+        path: "/signup",
+        element: <SignUp />,
       },
-    ],
-  },
-  {
-    path: "/signin",
-    children: [
       {
-        index: true,
-        element: <Signin />,
+        path: "/login",
+        element: <Login />,
       },
-    ],
-  },
-  {
-    path: "/challenges",
-    children: [
       {
-        index: true,
+        path: "/challenges",
         element: <Challenges />,
       },
     ],
   },
+
   {
     path: "*",
     element: <NotFound />,

@@ -1,88 +1,81 @@
 import { useEffect } from "react";
 import google from "../assets/images/google.png";
 import {
-  useCreateUserWithEmailAndPassword,
+  useSendPasswordResetEmail,
+  useSignInWithEmailAndPassword,
   useSignInWithGoogle,
-  useUpdateProfile,
 } from "react-firebase-hooks/auth";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import auth from "../firebase.init";
 // import useToken from "../../hooks/useToken";
 import Loading from "../utils/Loading";
 
-const SignUp = () => {
+const Login = () => {
   const navigate = useNavigate();
-  const [signInWithGoogle, googleUser, googleLoading, googleError] =
-    useSignInWithGoogle(auth);
-
-  const [createUserWithEmailAndPassword, user, loading, error] =
-    useCreateUserWithEmailAndPassword(auth, { sendEmailVerification: true });
-
-  const [updateProfile, updating, updateError] = useUpdateProfile(auth);
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
 
   const {
     register,
     formState: { errors },
     handleSubmit,
+    getValues,
   } = useForm();
+  const onSubmit = (data) => {
+    signInWithEmailAndPassword(data.email, data.password);
+  };
+  const [signInWithGoogle, googleUser, googleLoading, googleError] =
+    useSignInWithGoogle(auth);
+
+  const [signInWithEmailAndPassword, user, loading, error] =
+    useSignInWithEmailAndPassword(auth);
+  const [sendPasswordResetEmail, sending, resetError] =
+    useSendPasswordResetEmail(auth);
 
   // const [token] = useToken(user || googleUser);
 
-  const onSubmit = async (data) => {
-    await createUserWithEmailAndPassword(data.email, data.password);
-    await updateProfile({ displayName: data.name });
+  const handleResetPassword = async () => {
+    const email = getValues("email");
+
+    if (email) {
+      await sendPasswordResetEmail(email);
+      toast.success("Password Reset Email Send!");
+    } else {
+      toast.error("Please enter your email");
+    }
   };
 
   // useEffect(() => {
   //   if (token) {
-  //     navigate("/dashboard");
+  //     navigate(from, { replace: true });
   //   }
-  // }, [token, navigate]);
+  // }, [token, from, navigate]);
+
   if (user || googleUser) {
     navigate("/home");
   }
+
   let signInError;
-  if (error || googleError || updateError) {
+  if (error || googleError || resetError) {
     signInError = (
       <span className="text-red-500">
-        {error?.message || googleError?.message}
+        {error?.message || googleError?.message || resetError?.message}
       </span>
     );
   }
-  if (loading || googleLoading || updating) {
+  if (loading || googleLoading || sending) {
     return <Loading></Loading>;
   }
+
   return (
     <div className="flex justify-center items-center my-10">
       <div className="card lg:w-[35%] md:w-[60%] w-[90%] bg-base-100 shadow-xl">
         <div className="card-body items-center ">
-          <h2 className="card-title text-2xl">Sign Up</h2>
+          <h2 className="card-title text-2xl">Login</h2>
 
           <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">Name</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Your Name"
-                className="input input-bordered w-full"
-                {...register("name", {
-                  required: {
-                    value: true,
-                    message: "Name is required",
-                  },
-                })}
-              />
-              <label className="label">
-                {errors.name?.type === "required" && (
-                  <span className="label-text-alt text-red-500 text-sm">
-                    {errors.name.message}
-                  </span>
-                )}
-              </label>
-            </div>
             <div className="form-control w-full">
               <label className="label">
                 <span className="label-text">Email</span>
@@ -115,7 +108,7 @@ const SignUp = () => {
                 )}
               </label>
             </div>
-            <div className="form-control w-full ">
+            <div className="form-control w-full">
               <label className="label">
                 <span className="label-text">Password</span>
               </label>
@@ -146,18 +139,26 @@ const SignUp = () => {
                   </span>
                 )}
               </label>
+              <button
+                type="button"
+                onClick={handleResetPassword}
+                className="btn text-sky-500 btn-link normal-case text-left"
+              >
+                <p>Forget Password?</p>
+              </button>
             </div>
+
             {signInError}
             <input
               type="submit"
               className="btn btn-primary w-full mt-4 text-white"
-              value="Sign Up"
+              value="Login"
             />
           </form>
           <p className="text-sm pt-2">
-            Already have an Account?{" "}
-            <Link className="text-sky-500" to="/login">
-              Please Login
+            New to React Challenge?{" "}
+            <Link className="text-sky-500" to="/signup">
+              Create new account
             </Link>
           </p>
 
@@ -177,4 +178,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default Login;
