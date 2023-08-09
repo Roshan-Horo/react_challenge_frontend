@@ -1,27 +1,13 @@
 import { useEffect } from "react";
 import google from "../assets/images/google.png";
-import {
-  useCreateUserWithEmailAndPassword,
-  useSignInWithGoogle,
-  useUpdateProfile,
-} from "react-firebase-hooks/auth";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
-import auth from "../firebase.init";
-// import useToken from "../../hooks/useToken";
-import Loading from "../utils/Loading";
-import {postUserData} from '../api/api'
+import { postUserData } from "../api/api";
+import { useAuth } from "../context/auth-context";
 
-
-const SignUp = () => {
+const SignUp1 = () => {
   const navigate = useNavigate();
-  const [signInWithGoogle, googleUser, googleLoading, googleError] =
-    useSignInWithGoogle(auth);
-
-  const [createUserWithEmailAndPassword, user, loading, error] =
-    useCreateUserWithEmailAndPassword(auth, { sendEmailVerification: true });
-
-  const [updateProfile, updating, updateError] = useUpdateProfile(auth);
+  const { register: signup } = useAuth();
 
   const {
     register,
@@ -29,56 +15,21 @@ const SignUp = () => {
     handleSubmit,
   } = useForm();
 
-  // const [token] = useToken(user || googleUser);
+  let signInError;
 
   const onSubmit = async (data) => {
-    await createUserWithEmailAndPassword(data.email, data.password);
-    await updateProfile({ displayName: data.name });
+    console.log("data : ", data);
+    // const res = await postUserData({...data, passcode: data.password})
+    const res = await signup({ ...data, passcode: data.password });
+    console.log("res : ", res);
+    if (!res.status) {
+      signInError = <span className="text-red-500">{res.msg}</span>;
+    }
   };
 
-  // useEffect(() => {
-  //   if (token) {
-  //     navigate("/dashboard");
-  //   }
-  // }, [token, navigate]);
-  if ((user || googleUser) && !(loading || googleLoading || updating)) {
-    // save user into db and get the jwt token
-    console.log('user : ', user) // { user: { displayName: "your name", email: "youremail@gmail.com"}}
-    console.log('googleUser : ', googleUser)
-    if((user.user.displayName !== null && user.user.displayName !== undefined) 
-      && (user.user.email !== null && user.user.email !== undefined)){
-
-    const backendResponse = postUserData({name: user?.user.displayName, email: user?.user.email})
-    console.log('back res : ', backendResponse)
-    if(backendResponse.status){
-     // save user info into localstorage
-
-     // navigate to homepage
-    navigate("/home");
-
-    }else{
-     // show error
-     console.log('backend response error')
-    }
-
-    }
-    
-
-  }
-  let signInError;
-  if (error || googleError || updateError) {
-    signInError = (
-      <span className="text-red-500">
-        {error?.message || googleError?.message}
-      </span>
-    );
-  }
-  if (loading || googleLoading || updating) {
-    return <Loading></Loading>;
-  }
   return (
     <div className="flex justify-center items-center my-10">
-      <div className="card lg:w-[35%] md:w-[60%] w-[90%] bg-base-100 shadow-xl">
+      <div className="card w-[90%] bg-base-100 shadow-xl">
         <div className="card-body items-center ">
           <h2 className="card-title text-2xl">Sign Up</h2>
 
@@ -200,4 +151,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default SignUp1;

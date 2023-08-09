@@ -4,7 +4,9 @@ import NotFound from "../pages/NotFound";
 import LandingPage from "../pages/Landing";
 import SignUp from "../pages/SignUp";
 import Login from "../pages/Login";
-import Challenges from "../pages/Challenges";
+import Challenges, {loadChallenges} from "../pages/Challenges";
+import SignUp1 from "../pages/Signup1";
+import Challenge, {loadChallenge} from "../pages/Challenge";
 
 const routes = createBrowserRouter([
   {
@@ -20,12 +22,28 @@ const routes = createBrowserRouter([
         element: <SignUp />,
       },
       {
+        path: "/signup1",
+        element: <SignUp1 />
+      },
+      {
         path: "/login",
         element: <Login />,
       },
       {
         path: "/challenges",
-        element: <Challenges />,
+        children: [
+          {
+            index: true,
+            element: <Challenges />,
+            loader: loadChallenges
+          },
+          {
+            path: "challengeId/:challengeId",
+            element: <Challenge />,
+            loader: loadChallenge
+          }
+        ]
+        
       },
     ],
   },
